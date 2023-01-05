@@ -23,31 +23,17 @@ train$Sentiment <- factor(train$Sentiment,
                                      "Extremely Positive",
                                      "Extremely Negative"))
 validation$Sentiment <- factor(validation$Sentiment,
-                          levels = c("Neutral",
-                                     "Positive","Negative",
-                                     "Extremely Positive",
-                                     "Extremely Negative"))
+                               levels = c("Neutral",
+                                          "Positive","Negative",
+                                          "Extremely Positive",
+                                          "Extremely Negative"))
 
-if(!require(caret)) install.packages("caret", repos = "http://cran.us.r-project.org")
-library(caret)
-
-set.seed(1, sample.kind="Rounding") # if using R 3.5 or earlier, use `set.seed(1)`
-
-test_index <- createDataPartition(y = train$Sentiment, 
-                                  times = 1, 
-                                  p = 0.1, 
-                                  list = FALSE)
-train_nlp <- train[-test_index,]
-test_nlp <- train[test_index,]
+train_nlp <- train
 validation_nlp <- validation
 
 remove_reg <- "&amp;|&lt;|&gt;"
 
 train_nlp <- train_nlp %>%
-  mutate(OriginalTweet = str_remove_all(OriginalTweet, remove_reg)) %>%
-  unnest_tokens(word, OriginalTweet)
-
-test_nlp <- test_nlp %>%
   mutate(OriginalTweet = str_remove_all(OriginalTweet, remove_reg)) %>%
   unnest_tokens(word, OriginalTweet)
 
@@ -90,7 +76,7 @@ gimme_accuracy <- function(thres,prediction,actual){
   
   comparison <- merge(x = prediction, y = actual, by = "UserName")
   return(sum(comparison$sentiment_class == comparison$Sentiment)/nrow(comparison))
-
+  
 }
 
 thres <- seq(0,10,1)
@@ -105,7 +91,7 @@ tt <- thres[which.max(accuracy)]
 
 max(accuracy)
 
-thres <- 3
+thres <- tt
 
 #Validation
 

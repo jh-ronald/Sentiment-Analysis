@@ -30,8 +30,9 @@ validation$Sentiment <- factor(validation$Sentiment,
 train_nlp <- train
 validation_nlp <- validation
 
+set.seed(3798, sample.kind = "Rounding")
+i <- runif(3798, min = 1, max = 41158)
 
-i <- seq(1,1000)
 vader_score <- vader_df(train_nlp$OriginalTweet[i])["compound"]
 train_n <- train_nlp[i,]
 
@@ -66,15 +67,23 @@ qplot(thres, accuracy)
 
 tt <- thres[which.max(accuracy)]
 
-max(accuracy)
+train_test_accuracy <- max(accuracy)
 
 thres <- tt
 
 #Validation
 
-val_vader_score <- vader_df(validation_nlp$OriginalTweet[i])["compound"]
-validation_n <- validation_nlp[i,]
+validation_nlp <- validation_nlp %>%
+  filter(!row_number() %in% c(1800))
+
+val_vader_score <- vader_df(validation_nlp$OriginalTweet)["compound"]
+validation_n <- validation_nlp
 
 final_accuracy <- gimme_accuracy(thres,val_vader_score,validation_n)
 
 final_accuracy
+
+result_table <- tibble("Section" = c("Training + Testing","Validation"),
+                       "Accuracy in %" = c(train_test_accuracy*100, final_accuracy*100))
+
+result_table
